@@ -33,7 +33,7 @@
 ### Running the Tool
 
 ```bash
-./target/release/iocseek --config config/config.yml --input input_directory --output output/results.yml
+./target/release/iocseek --config config/config.yml --input input --output output/results.yml
 ```
 
 - **config.yml**: The YAML file defining the IoCs to search for and the search patterns.
