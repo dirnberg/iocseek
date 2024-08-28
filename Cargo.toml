@@ -1,0 +1,29 @@
+[package]
+name = "iocseek"
+version = "0.1.0"
+edition = "2021"
+
+# Optional: Add an authors field or description
+authors = ["Herbert Dirnberger"]
+description = "A tool for scanning files for Indicators of Compromise (IoCs)"
+license = "MIT"
+
+[dependencies]
+# Command-line argument parsing
+clap = { version = "4.0", features = ["derive"] }
+
+# Regular expressions for pattern matching
+regex = "1.7.1"
+
+# Deserialize YAML into Rust structs
+serde = { version = "1.0", features = ["derive"] }
+
+# For parsing YAML files
+serde_yaml = "0.9.18"
+
+[profile.release]
+opt-level = 3  # Optimize for maximum performance
+
+[dev-dependencies]
+# For creating temporary files in tests (optional)
+tempfile = "3.3"

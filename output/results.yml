@@ -1,0 +1,42 @@
+found:
+  SHA-256 Hashes:
+  - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  IP Addresses: []
+  Protocols:
+  - modbus
+  URLs: []
+  Domains: []
+  SHA-512 Hashes: []
+  MITRE Techniques: []
+  MAC Addresses: []
+notfound:
+  SHA-256 Hashes: []
+  URLs: []
+  MAC Addresses: []
+  Domains:
+  - www.football.com
+  MITRE Techniques:
+  - T0800
+  SHA-512 Hashes: []
+  IP Addresses:
+  - 1.1.1.1
+  Protocols: []
+summary:
+  MAC Addresses: 0
+  URLs: 0
+  SHA-256 Hashes: 1
+  MITRE Techniques: 0
+  SHA-512 Hashes: 0
+  Protocols: 1
+  IP Addresses: 0
+  Domains: 0
+points_per_category:
+  IP Addresses: 0/1
+  URLs: 0/0
+  MITRE Techniques: 0/1
+  Protocols: 1/1
+  Domains: 0/1
+  SHA-256 Hashes: 1/1
+  SHA-512 Hashes: 0/0
+  MAC Addresses: 0/0
+total_points: 2/5

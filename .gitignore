@@ -1,0 +1,17 @@
+
+config/csca2024.yml
+Dockerfile
+input/config.yaml
+input/config.yml
+Dockerfile
+input/sample_archive.zip
+iocseek.py
+output/iocseek_result.yaml
+requirements.txt
+target/.rustc_info.json
+target/CACHEDIR.TAG
+target/config/config.yml
+target/debug/.cargo-lock
+target/debug/.fingerprint/aho-corasick-bdd1d5c8df36c96d/dep-lib-aho_corasick
+target/debug/.fingerprint/aho-corasick-bdd1d5c8df36c96d/invoked.timestamp
+/target

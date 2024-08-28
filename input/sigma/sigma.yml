@@ -1,0 +1,13 @@
+
+title: IoC Detection - Suspicious URL
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    CommandLine|contains:
+      - "https://phishing-site.com/login"
+  condition: selection
+fields:
+  - CommandLine

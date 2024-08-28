@@ -1,0 +1,27 @@
+patterns:
+  ip_regex: "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b"
+  mac_regex: "([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})"
+  mitre_regex: "T[0-9]{4}(\\.[0-9]{3})?"
+  url_regex: "https?://[^\\s/$.?#].[^\\s]*"
+  domain_regex: "[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}"
+  sha256_regex: "[a-fA-F0-9]{64}"
+  sha512_regex: "[a-fA-F0-9]{128}"
+
+lists:
+  ip_list:
+    - "1.1.1.1" # Alert Bad IP reputation (new node) [CrashOverride]
+  mac_list:
+    []
+  mitre_list:
+    - "T0800" # Netzwerk Scan
+  domain_list:
+    - "www.football.com" # Alert Malicious domain [Grizzly Steppe Threat Actor)]
+  url_list:
+    []
+    #- "http://example.com/malicious"
+  protocol_list:
+    - "modbus" # Incident Eng operations 
+  sha256_list:
+    - "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # Alert Malware detection [Trojan] 
+  sha512_list:
+    []
