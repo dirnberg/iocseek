@@ -35,28 +35,30 @@
 #### On macOS and Linux
 
 1. **Prepare your input files**:
-   - Ensure you have the archive file (e.g., `example_archive.zip`) and a YAML configuration file (`config.yaml`).
+   - Place the following files in the `input` directory:
+     - **`config.yaml`**: The configuration file guiding the analysis.
+     - **`example_archive.zip`**: The archive containing the files to be analyzed.
 
 2. **Run the Docker container**:
     ```bash
-    docker run -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output iocseek /app/input/example_archive.zip /app/input/config.yaml /app/output/results.yaml
+    docker run -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output iocseek /app/input/example_archive.zip /app/input/config.yaml /app/output/iocseek_result.yaml
     ```
 
-   - Replace `$(pwd)/input` with the path to your input directory containing the archive and configuration files.
-   - Replace `$(pwd)/output` with the path to your output directory where the results will be saved.
+   - The analysis results will be saved in the `output` directory as `iocseek_result.yaml`.
 
 #### On Windows
 
 1. **Prepare your input files**:
-   - Ensure you have the archive file (e.g., `example_archive.zip`) and a YAML configuration file (`config.yaml`).
+   - Place the following files in the `input` directory:
+     - **`config.yaml`**: The configuration file guiding the analysis.
+     - **`example_archive.zip`**: The archive containing the files to be analyzed.
 
 2. **Run the Docker container**:
     ```powershell
-    docker run -v ${PWD}/input:/app/input -v ${PWD}/output:/app/output iocseek /app/input/example_archive.zip /app/input/config.yaml /app/output/results.yaml
+    docker run -v ${PWD}/input:/app/input -v ${PWD}/output:/app/output iocseek /app/input/example_archive.zip /app/input/config.yaml /app/output/iocseek_result.yaml
     ```
 
-   - Replace `${PWD}/input` with the path to your input directory containing the archive and configuration files.
-   - Replace `${PWD}/output` with the path to your output directory where the results will be saved.
+   - The analysis results will be saved in the `output` directory as `iocseek_result.yaml`.
 
 ### Example YAML Configuration
 
@@ -92,6 +94,7 @@ logging:
   level: INFO
   format: '%(asctime)s - %(levelname)s - %(message)s'
   output_file: 'script.log'
+```
 
 ### Logs
 Logs are configured via the config.yaml file. You can customize the log level, format, and specify an output file for the logs.
@@ -104,13 +107,4 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 
 ### License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-### Summary of Changes:
-
-1. **Docker Version Recommendation**: Added a recommendation to use Docker version 20.10 or later.
-2. **Usage Instructions**: Provided separate instructions for running Docker commands on macOS/Linux and Windows, accounting for differences in how file paths are handled across operating systems.
-3. **Windows Command**: Modified the Docker run command to use `${PWD}` which is compatible with PowerShell, typically used on Windows.
-
-This ensures users can correctly run the Docker container on different platforms and with the appropriate Docker version.
-
 
