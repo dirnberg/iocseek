@@ -40,7 +40,6 @@ struct Patterns {
     url_regex: String,
     domain_regex: String,
     sha256_regex: String,
-    sha512_regex: String,
 }
 
 /// Structure for the lists of IoCs to search for
@@ -53,7 +52,6 @@ struct Lists {
     url_list: Vec<String>,
     protocol_list: Vec<String>,
     sha256_list: Vec<String>,
-    sha512_list: Vec<String>,
 }
 
 /// Structure for saving the results, including a summary
@@ -99,7 +97,6 @@ fn search_iocs_in_file(file_path: &Path, patterns: &Patterns, lists: &Lists) -> 
     match_and_insert(&Regex::new(&patterns.url_regex)?, &lists.url_list, "URLs");
     match_and_insert(&Regex::new(&patterns.domain_regex)?, &lists.domain_list, "Domains");
     match_and_insert(&Regex::new(&patterns.sha256_regex)?, &lists.sha256_list, "SHA-256 Hashes");
-    match_and_insert(&Regex::new(&patterns.sha512_regex)?, &lists.sha512_list, "SHA-512 Hashes");
 
     // Match industrial protocols directly (no regex needed)
     let mut found_protocols = HashSet::new();
@@ -181,7 +178,6 @@ fn save_results_to_yaml(path: &str, results: &HashMap<String, Vec<String>>, list
         ("URLs", &lists.url_list),
         ("Domains", &lists.domain_list),
         ("SHA-256 Hashes", &lists.sha256_list),
-        ("SHA-512 Hashes", &lists.sha512_list),
         ("Protocols", &lists.protocol_list),
     ];
 
@@ -191,29 +187,8 @@ fn save_results_to_yaml(path: &str, results: &HashMap<String, Vec<String>>, list
 
     // Output to the console in the sorted order
     println!("\n--- IoC Search Results ---");
-    println!("Points Per Category:");
-    for (category, _) in &categories {
-        println!("{}: {}", category.0, points_per_category.get(category.0).unwrap());
-    }
+
     println!("\nTotal Points: {}/{}\n", total_points, max_points);
-
-    println!("Found IoCs:");
-    for (category, _) in &categories {
-        if let Some(items) = found.get(category.0) {
-            if !items.is_empty() {
-                println!("{}: {:?}", category.0, items);
-            }
-        }
-    }
-
-    println!("\nNot Found IoCs:");
-    for (category, _) in &categories {
-        if let Some(items) = notfound.get(category.0) {
-            if !items.is_empty() {
-                println!("{}: {:?}", category.0, items);
-            }
-        }
-    }
 
     let output = Results {
         found,
