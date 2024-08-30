@@ -1,6 +1,7 @@
 use clap::Parser; // Import the Parser trait from clap
 use regex::Regex; // Regular expressions for pattern matching
 use serde::{Deserialize, Serialize}; // Deserialize YAML configuration into Rust structs and Serialize results
+use sha2::{Sha256, Digest}; // SHA-256 hashing
 use std::collections::{HashMap, HashSet}; // Data structures to store matches
 use std::fs::{self, File}; // File operations
 use std::io::Read; // Reading file contents
@@ -29,6 +30,9 @@ struct Args {
 struct Config {
     patterns: Patterns,
     lists: Lists,
+    salt_pin: String,
+    hash_length: usize,
+    flag_placeholder: String, // New field for flag placeholder
 }
 
 /// Structure for the pattern matching configurations
@@ -54,14 +58,13 @@ struct Lists {
     sha256_list: Vec<String>,
 }
 
-/// Structure for saving the results, including a summary
+/// Structure for saving the results, including the summary and truncated flags
 #[derive(Debug, Serialize)]
 struct Results {
-    found: HashMap<String, Vec<String>>,
-    notfound: HashMap<String, Vec<String>>,
-    summary: HashMap<String, usize>,
-    points_per_category: HashMap<String, String>,
-    total_points: String,
+    total_points: usize,  // Total points scored
+    max_points: usize,    // Maximum possible points
+    points_per_category: HashMap<String, String>,  // Points per category from max
+    flags: Vec<String>,   // Captured truncated flags, each flag on a separate line
 }
 
 /// Function to load and parse the YAML configuration file with validation
@@ -69,6 +72,14 @@ fn load_config(path: &str) -> Result<Config, Box<dyn Error>> {
     let file = File::open(path)?; // Open the YAML file
     let config: Config = serde_yaml::from_reader(file)?; // Parse YAML into Config struct
     Ok(config)
+}
+
+/// Function to generate a truncated SHA-256 flag hash using the placeholder
+fn generate_truncated_flag(ioc: &str, salt: &str, length: usize, placeholder: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(format!("{}{}", salt, ioc).as_bytes());
+    let result = hasher.finalize();
+    format!("{}{{{}}}", placeholder, &hex::encode(result)[..length])
 }
 
 /// Function to search a file for Indicators of Compromise (IoCs) based on the patterns and lists
@@ -138,39 +149,36 @@ fn traverse_and_search(directory: &Path, patterns: &Patterns, lists: &Lists) -> 
     Ok(total_matches)
 }
 
-/// Function to save the results to a YAML file, including a summary, and print the results
-fn save_results_to_yaml(path: &str, results: &HashMap<String, Vec<String>>, lists: &Lists) -> Result<(), Box<dyn Error>> {
+/// Function to save the results to a YAML file, including a summary and points
+fn save_results_to_yaml(path: &str, results: &HashMap<String, Vec<String>>, lists: &Lists, salt: &str, hash_length: usize, flag_placeholder: &str) -> Result<(), Box<dyn Error>> {
     let file = File::create(path)?; // Create the output file
 
-    // Calculate how many IoCs from each category were found
-    let mut summary: HashMap<String, usize> = HashMap::new();
-    let mut points_per_category: HashMap<String, String> = HashMap::new();
+    let mut points_per_category: HashMap<String, String> = HashMap::new();  // Points per category and max
+    let mut flags: Vec<String> = Vec::new();  // List of flags, each flag on a separate line
     let mut total_points: usize = 0;
     let mut max_points: usize = 0;
 
-    // Prepare found and notfound sections
-    let mut found: HashMap<String, Vec<String>> = HashMap::new();
-    let mut notfound: HashMap<String, Vec<String>> = HashMap::new();
-
-    // Helper function to calculate points and separate found/notfound items
-    let mut calculate_points = |key: &str, list: &[String]| {
+    let mut generate_results = |key: &str, list: &[String]| {
         let found_items: Vec<String> = list.iter().filter(|item| results.get(key).unwrap_or(&vec![]).contains(item)).cloned().collect();
-        let notfound_items: Vec<String> = list.iter().filter(|item| !results.get(key).unwrap_or(&vec![]).contains(item)).cloned().collect();
+        
+        if !found_items.is_empty() {
+            // Generate truncated flags
+            let flags_for_category: Vec<String> = found_items.iter().map(|ioc| generate_truncated_flag(ioc, salt, hash_length, flag_placeholder)).collect();
+            flags.extend(flags_for_category);
 
-        found.insert(key.to_string(), found_items.clone());
-        notfound.insert(key.to_string(), notfound_items.clone());
-
-        let points = found_items.len();
-        let max = list.len();
-
-        summary.insert(key.to_string(), points);
-        points_per_category.insert(key.to_string(), format!("{}/{}", points, max));
-
-        total_points += points;
-        max_points += max;
+            // Update summary and points
+            let points = found_items.len();
+            let max = list.len();
+            points_per_category.insert(key.to_string(), format!("{}/{}", points, max));
+            total_points += points;
+            max_points += max;
+        } else {
+            // Even if no items found, we still track the max for consistency
+            points_per_category.insert(key.to_string(), format!("0/{}", list.len()));
+            max_points += list.len();
+        }
     };
 
-    // Calculate points for each category in the order of the configuration file
     let categories = [
         ("IP Addresses", &lists.ip_list),
         ("MAC Addresses", &lists.mac_list),
@@ -182,23 +190,17 @@ fn save_results_to_yaml(path: &str, results: &HashMap<String, Vec<String>>, list
     ];
 
     for (category, list) in &categories {
-        calculate_points(category, list);
+        generate_results(category, list);
     }
 
-    // Output to the console in the sorted order
-    println!("\n--- IoC Search Results ---");
-
-    println!("\nTotal Points: {}/{}\n", total_points, max_points);
-
     let output = Results {
-        found,
-        notfound,
-        summary,
-        points_per_category,
-        total_points: format!("{}/{}", total_points, max_points),
+        total_points,        // Total points scored
+        max_points,          // Maximum possible points
+        points_per_category, // Points per category from max
+        flags,               // Captured truncated flags, each flag on a separate line
     };
 
-    serde_yaml::to_writer(file, &output)?; // Write the results and summary to the file in YAML format
+    serde_yaml::to_writer(file, &output)?; // Write the results to the file in YAML format
     Ok(())
 }
 
@@ -220,6 +222,10 @@ fn main() {
         }
     };
 
+    let salt = &config.salt_pin; // Use the salt PIN from the configuration
+    let hash_length = config.hash_length; // Use the hash length from the configuration
+    let flag_placeholder = &config.flag_placeholder; // Use the flag placeholder from the configuration
+
     // Traverse the directory and search for IoCs
     let total_matches = match traverse_and_search(Path::new(directory_to_search), &config.patterns, &config.lists) {
         Ok(matches) => matches,
@@ -230,7 +236,7 @@ fn main() {
     };
 
     // Save the results to a YAML file
-    if let Err(err) = save_results_to_yaml(result_output_path, &total_matches, &config.lists) {
+    if let Err(err) = save_results_to_yaml(result_output_path, &total_matches, &config.lists, salt, hash_length, flag_placeholder) {
         eprintln!("Failed to save results: {}", err);
         process::exit(1);
     }

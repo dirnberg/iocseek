@@ -9,19 +9,20 @@ patterns:
 
 lists:
   ip_list:
-    - "1.1.1.1" # Alert Bad IP reputation (new node) [CrashOverride]
+    []  # No IP addresses provided
   mac_list:
-    []
+    - "00:0a:95:9d:68:16"  # Provided MAC address that was not reported
   mitre_list:
-    - "T0800" # Netzwerk Scan
+    - "T1078"  # Provided MITRE technique ID that was not reported
   domain_list:
-    - "www.football.com" # Alert Malicious domain [Grizzly Steppe Threat Actor)]
+    - "maliciousdomain.com"  # Provided domain that was not reported
   url_list:
-    []
-    #- "http://example.com/malicious"
+    - "https://phishing-site.com/login"  # Provided URL that was not reported
   protocol_list:
-    - "modbus" # Incident Eng operations 
+    []  # No protocols provided
   sha256_list:
-    - "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # Alert Malware detection [Trojan] 
-  sha512_list:
-    []
+    - "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # Provided SHA-256 hash that was not reported
+
+salt_pin: "1234"  # 4-digit PIN used as salt for hashing
+hash_length: 10  # Length of the truncated hash
+flag_placeholder: "CTF"  # Placeholder for the flag format

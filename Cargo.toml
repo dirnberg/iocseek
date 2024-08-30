@@ -21,6 +21,12 @@ serde = { version = "1.0", features = ["derive"] }
 # For parsing YAML files
 serde_yaml = "0.9.18"
 
+# SHA-256 hashing
+sha2 = "0.10.5"
+
+# For converting bytes to hex
+hex = "0.4"
+
 [profile.release]
 opt-level = 3  # Optimize for maximum performance
 
